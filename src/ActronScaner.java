@@ -27,16 +27,15 @@ public class ActronScaner extends JPanel {
 
 		final CategoryDataset dataset = new DefaultCategoryDataset();
 
-		final FileDialog fileDialog = new FileDialog(frame,
-				"Select Actron Data File");
+		final FileDialog fileDialog = new FileDialog(frame, "Select Actron Data File");
 		fileDialog.setMultipleMode(false);
 		JButton fileDialogButton = new JButton("File Dialog");
 		fileDialogButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				fileDialog.setVisible(true);
-				File files[] = fileDialog.getFiles();
+				File[] files = fileDialog.getFiles();
 				for (File file : files) {
-					System.out.println("File: " + file.getName());
+					// System.out.println("File: " + file.getName());
 					processFile(file);
 				}
 			}
@@ -52,12 +51,10 @@ public class ActronScaner extends JPanel {
 						continue;
 					for (FrameData fData : p.getFrames()) {
 						if (fData.getFrameData().get(key) != null) {
-							double value = Double.valueOf(fData.getFrameData()
-									.get(key));
+							double value = Double.valueOf(fData.getFrameData().get(key));
 							String column = fData.getFrameTime();
 							String series = key;
-							((DefaultCategoryDataset) dataset).addValue(value,
-									series, column);
+							((DefaultCategoryDataset) dataset).addValue(value, series, column);
 						}
 					}
 				}
@@ -74,16 +71,14 @@ public class ActronScaner extends JPanel {
 	/**
 	 * Creates a sample chart.
 	 * 
-	 * @param dataset
-	 *            a dataset.
+	 * @param dataset a dataset.
 	 * 
 	 * @return The chart.
 	 */
 	private JFreeChart createChart(final CategoryDataset dataset) {
 
 		// create the chart...
-		final JFreeChart chart = ChartFactory.createLineChart(
-				"Line Chart Demo 1", // chart title
+		final JFreeChart chart = ChartFactory.createLineChart("Line Chart Demo 1", // chart title
 				"Type", // domain axis label
 				"Value", // range axis label
 				dataset, // data
@@ -91,7 +86,7 @@ public class ActronScaner extends JPanel {
 				true, // include legend
 				true, // tooltips
 				false // urls
-				);
+		);
 
 		// NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 		// final StandardLegend legend = (StandardLegend) chart.getLegend();

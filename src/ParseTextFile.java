@@ -8,33 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-
 public class ParseTextFile {
 
 	private String fileName;
-	
-	private List<String> keys = new ArrayList<String>();
-	private List<FrameData> frames = new ArrayList<FrameData>();
+
+	private List<String> keys = new ArrayList<>();
+	private List<FrameData> frames = new ArrayList<>();
 
 	public ParseTextFile(String fileName) {
 		this.fileName = fileName;
-		
+
 	}
 
 	public static void main(String[] args) {
-		//String fileName = "1_TPC61AC.tmp.txt";
-		//String fileName = "ram_cold_p0420_20220109.txt";
+		// String fileName = "1_TPC61AC.tmp.txt";
+		// String fileName = "ram_cold_p0420_20220109.txt";
 		String fileName = "Ram_2_PassangerSideOX.txt";
 		ParseTextFile p = new ParseTextFile(fileName);
 		p.parseFile();
 	}
 
 	public void parseFile() {
-		
-		File file= new File(fileName);
-		
-		InputStream gzInStream = null; 
-		
+
+		File file = new File(fileName);
+
+		InputStream gzInStream = null;
+
 		BufferedReader bf = null;
 		int i = 0;
 		try {
@@ -44,7 +43,7 @@ public class ParseTextFile {
 			} else {
 				bf = new BufferedReader(new FileReader(file));
 			}
-			
+
 //			Recorded Data
 //
 //			MIL STATUS       OFF
@@ -59,65 +58,68 @@ public class ParseTextFile {
 //
 //			MIL STATUS($00)  OFF
 //			ABSLT TPS($00)  20.7
-	
+
 			String line;
 			int errors = 0;
 			FrameData frameData = new FrameData();
 			while ((line = bf.readLine()) != null) {
 				i++;
 				line = line.trim();
-				if (line.length() == 0 ) continue;
-				if (line.startsWith("Recorded Data") ) continue;
-				
+				if (line.length() == 0)
+					continue;
+				if (line.startsWith("Recorded Data"))
+					continue;
+
 				if (line.startsWith("Frame")) {
-					//System.out.println("FRAME '" + line + "'");
-					//Frame  -5 Time -27.5
+					// System.out.println("FRAME '" + line + "'");
+					// Frame -5 Time -27.5
 					frameData.setFrameNumber(line);
 					frames.add(frameData);
-					//System.out.println("-------------------");
+					// System.out.println("-------------------");
 					frameData = new FrameData();
 				} else {
 					line = fixLine(line);
-				
-					if (line.indexOf("  ") > -1) {				
-						//split on the " " 
+
+					if (line.indexOf("  ") > -1) {
+						// split on the " "
 						String key = line.substring(0, line.indexOf("  ")).trim();
 						String value = line.substring(line.indexOf("  ")).trim();
-						
+
 						if (value.indexOf(")") > -1) {
 							value = value.substring(value.indexOf(")") + 1).trim();
 						}
-						//if (key.startsWith("O2S")) {
-						//	System.out.println("LINE '" + line + "'  key ='" + key + "' value='" + value +"'" );
-						//}
-						if (! keys.contains(key)) {
+						// if (key.startsWith("O2S")) {
+						// System.out.println("LINE '" + line + "' key ='" + key + "' value='" + value
+						// +"'" );
+						// }
+						if (!keys.contains(key)) {
 							keys.add(key);
 						}
-						frameData.addData(key,value);
+						frameData.addData(key, value);
 					} else {
 						errors++;
 						System.out.println(errors + " - Found line '" + line + "'");
 					}
 				}
 			}
-			
-			
+
 			System.out.println("\n\n------------------");
 			System.out.print("Frame   ");
-			for(FrameData fData: frames) {
+			for (FrameData fData : frames) {
 				System.out.print("\t'" + fData.getFrameNumber() + "'");
 			}
 			System.out.println();
 			System.out.print("Time    ");
-			for(FrameData fData: frames) {
+			for (FrameData fData : frames) {
 				System.out.print("\t'" + fData.getFrameTime() + "'");
 			}
 			System.out.println();
-			
-			for(String key : keys) {
-				if (!key.startsWith("O2S")) continue;
+
+			for (String key : keys) {
+				if (!key.startsWith("O2S"))
+					continue;
 				System.out.print(key + "  ");
-				for(FrameData fData: frames) {
+				for (FrameData fData : frames) {
 					String value = " - ";
 					if (fData.getFrameData().get(key) != null) {
 						value = "'" + fData.getFrameData().get(key) + "'";
@@ -126,11 +128,11 @@ public class ParseTextFile {
 				}
 				System.out.println();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			
+
 		}
 	}
 
@@ -141,13 +143,13 @@ public class ParseTextFile {
 		fixedLine = fixedLine.replaceAll("\\(\\$", " 0X  ");
 
 		if (fixedLine.indexOf("  ") == -1 && fixedLine.indexOf("%") > -1) {
-			fixedLine = fixedLine.replaceAll("%", "%  ");	
+			fixedLine = fixedLine.replaceAll("%", "%  ");
 		} else if (fixedLine.indexOf("  ") == -1 && fixedLine.indexOf(" h:m") > -1) {
-			fixedLine = fixedLine.replaceAll("h:m", "h:m  ");	
+			fixedLine = fixedLine.replaceAll("h:m", "h:m  ");
 		} else if (fixedLine.indexOf("  ") == -1 && fixedLine.indexOf(" GR/SE") > -1) {
-			fixedLine = fixedLine.replaceAll(" GR/SE", " GR/SE  ");	
+			fixedLine = fixedLine.replaceAll(" GR/SE", " GR/SE  ");
 		} else if (fixedLine.indexOf("  ") == -1 && fixedLine.indexOf(" DE") > -1) {
-			fixedLine = fixedLine.replaceAll(" DE", " DE  ");	
+			fixedLine = fixedLine.replaceAll(" DE", " DE  ");
 		}
 
 		if (fixedLine.length() > 14 && fixedLine.indexOf("  ") == -1) {
